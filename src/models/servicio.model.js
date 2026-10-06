@@ -47,4 +47,21 @@ const crear = async ({ categoriaId, nombre, tipo, precio, duracionMinutos }) => 
   return resultado.insertId;
 };
 
-module.exports = { listar, obtenerPorId, crear };
+const actualizar = async (id, { categoriaId, nombre, tipo, precio, duracionMinutos }) => {
+  await pool.query(
+    `UPDATE portafolio_citas
+     SET cate_id = ?, port_cita_nombre = ?, port_cita_tipo = ?,
+         port_cita_precio = ?, port_cita_duracion_minutos = ?
+     WHERE port_cita_id = ?`,
+    [categoriaId, nombre, tipo, precio, duracionMinutos, id]
+  );
+};
+
+const cambiarEstado = async (id, estado) => {
+  await pool.query(
+    'UPDATE portafolio_citas SET port_cita_estado = ? WHERE port_cita_id = ?',
+    [estado, id]
+  );
+};
+
+module.exports = { listar, obtenerPorId, crear, actualizar, cambiarEstado };

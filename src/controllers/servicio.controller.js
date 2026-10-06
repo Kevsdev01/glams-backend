@@ -86,4 +86,53 @@ const crearServicio = async (req, res) => {
   }
 };
 
-module.exports = { listarServicios, obtenerServicio, crearServicio };
+const actualizarServicio = async (req, res) => {
+  try {
+    const { error, datos } = await validarDatos(req.body);
+    if (error) {
+      return res.status(400).json({ ok: false, mensaje: error });
+    }
+
+    const existente = await Servicio.obtenerPorId(req.params.id);
+    if (!existente) {
+      return res.status(404).json({ ok: false, mensaje: 'Servicio no encontrado' });
+    }
+
+    await Servicio.actualizar(req.params.id, datos);
+    res.json({ ok: true, mensaje: 'Servicio actualizado' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, mensaje: 'Error al actualizar el servicio' });
+  }
+};
+
+const cambiarEstadoServicio = async (req, res) => {
+  try {
+    const { estado } = req.body || {};
+    if (!ESTADOS.includes(estado)) {
+      return res.status(400).json({ ok: false, mensaje: 'estado debe ser ACTIVO o INACTIVO' });
+    }
+
+    const existente = await Servicio.obtenerPorId(req.params.id);
+    if (!existente) {
+      return res.status(404).json({ ok: false, mensaje: 'Servicio no encontrado' });
+    }
+
+    await Servicio.cambiarEstado(req.params.id, estado);
+    res.json({
+      ok: true,
+      mensaje: estado === 'ACTIVO' ? 'Servicio activado' : 'Servicio desactivado',
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, mensaje: 'Error al cambiar el estado del servicio' });
+  }
+};
+
+module.exports = {
+  listarServicios,
+  obtenerServicio,
+  crearServicio,
+  actualizarServicio,
+  cambiarEstadoServicio,
+};
