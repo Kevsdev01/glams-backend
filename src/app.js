@@ -23,6 +23,6 @@ app.get('/api/health', async (req, res) => {
 
 app.use('/api/categorias', require('./routes/categoria.routes'));
 app.use('/api/servicios', require('./routes/servicio.routes'));
-
+app.use('/api/auth', require('./routes/auth.routes'));
 
 module.exports = app;
