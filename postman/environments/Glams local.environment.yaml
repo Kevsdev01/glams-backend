@@ -1,0 +1,4 @@
+name: Glams local
+values:
+  - key: token
+    value: ''
