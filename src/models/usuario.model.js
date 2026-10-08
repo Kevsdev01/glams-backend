@@ -24,8 +24,8 @@ const buscarPorCorreo = async (correo) => {
 
 const buscarPorId = async (id) => {
   const [filas] = await pool.query(
-    `SELECT u.user_id, u.user_correo, u.user_estado,
-            u.user_nombre, u.user_apellido, r.role_nombre
+    `SELECT u.user_id, u.user_correo, u.user_estado, u.user_nombre, u.user_apellido,
+            u.user_telefono, u.user_fecha_registro, r.role_nombre
      FROM usuarios u
      JOIN roles r ON r.role_id = u.role_id
      WHERE u.user_id = ?`,
@@ -34,4 +34,30 @@ const buscarPorId = async (id) => {
   return filas[0];
 };
 
-module.exports = { crear, buscarPorCorreo, buscarPorId };
+const listar = async ({ rol, estado } = {}) => {
+  let sql = `SELECT u.user_id, u.user_correo, u.user_nombre, u.user_apellido,
+                    u.user_telefono, u.user_estado, u.user_fecha_registro, r.role_nombre
+             FROM usuarios u
+             JOIN roles r ON r.role_id = u.role_id
+             WHERE 1 = 1`;
+  const params = [];
+
+  if (rol) {
+    sql += ' AND r.role_nombre = ?';
+    params.push(rol);
+  }
+  if (estado) {
+    sql += ' AND u.user_estado = ?';
+    params.push(estado);
+  }
+  sql += ' ORDER BY u.user_apellido, u.user_nombre';
+
+  const [filas] = await pool.query(sql, params);
+  return filas;
+};
+
+const cambiarEstado = async (id, estado) => {
+  await pool.query('UPDATE usuarios SET user_estado = ? WHERE user_id = ?', [estado, id]);
+};
+
+module.exports = { crear, buscarPorCorreo, buscarPorId, listar, cambiarEstado };
