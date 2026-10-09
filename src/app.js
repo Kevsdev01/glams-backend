@@ -26,6 +26,7 @@ app.use('/api/servicios', require('./routes/servicio.routes'));
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/usuarios', require('./routes/usuario.routes'));
 app.use('/api/disponibilidad', require('./routes/disponibilidad.routes'));
+app.use('/api/citas', require('./routes/cita.routes'));
 
 
 module.exports = app;

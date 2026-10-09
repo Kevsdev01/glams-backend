@@ -63,4 +63,28 @@ const eliminar = async (id) => {
   await pool.query('DELETE FROM disponibilidad_empleado WHERE disp_empl_id = ?', [id]);
 };
 
-module.exports = { listarPorEmpleado, obtenerPorId, existeSolape, crear, actualizar, eliminar };
+// ¿Existe un bloque DISPONIBLE que contenga todo el rango [horaInicio, horaFin]?
+const estaDentroDeHorario = async ({ empleadoId, diaSemana, horaInicio, horaFin }) => {
+  const [filas] = await pool.query(
+    `SELECT 1
+     FROM disponibilidad_empleado
+     WHERE empleado_id = ?
+       AND disp_empl_dia_semana = ?
+       AND disp_empl_estado = 'DISPONIBLE'
+       AND disp_empl_hora_inicio <= ?
+       AND disp_empl_hora_fin >= ?
+     LIMIT 1`,
+    [empleadoId, diaSemana, horaInicio, horaFin]
+  );
+  return filas.length > 0;
+};
+
+module.exports = {
+  listarPorEmpleado,
+  obtenerPorId,
+  existeSolape,
+  estaDentroDeHorario,
+  crear,
+  actualizar,
+  eliminar,
+};
