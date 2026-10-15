@@ -79,6 +79,17 @@ const estaDentroDeHorario = async ({ empleadoId, diaSemana, horaInicio, horaFin 
   return filas.length > 0;
 };
 
+const listarBloquesDisponibles = async (empleadoId, diaSemana) => {
+  const [filas] = await pool.query(
+    `SELECT disp_empl_hora_inicio, disp_empl_hora_fin
+     FROM disponibilidad_empleado
+     WHERE empleado_id = ? AND disp_empl_dia_semana = ? AND disp_empl_estado = 'DISPONIBLE'
+     ORDER BY disp_empl_hora_inicio`,
+    [empleadoId, diaSemana]
+  );
+  return filas;
+};
+
 module.exports = {
   listarPorEmpleado,
   obtenerPorId,
@@ -87,4 +98,5 @@ module.exports = {
   crear,
   actualizar,
   eliminar,
+  listarBloquesDisponibles,
 };

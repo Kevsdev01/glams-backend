@@ -31,6 +31,15 @@ const diaSemanaISO = (f) => (f.getDay() === 0 ? 7 : f.getDay());
 
 const sumarMinutos = (f, minutos) => new Date(f.getTime() + minutos * 60000);
 
+// "HH:MM" o "HH:MM:SS" -> minutos desde la medianoche
+const horaAMinutos = (hora) => {
+  const [h, m] = hora.split(':').map(Number);
+  return h * 60 + m;
+};
+
+// minutos desde la medianoche -> "HH:MM"
+const minutosAHora = (minutos) => `${dosDigitos(Math.floor(minutos / 60))}:${dosDigitos(minutos % 60)}`;
+
 module.exports = {
   parsearFechaHora,
   formatearFecha,
@@ -38,4 +47,6 @@ module.exports = {
   formatearFechaHora,
   diaSemanaISO,
   sumarMinutos,
+  horaAMinutos,
+  minutosAHora,
 };

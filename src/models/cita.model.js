@@ -122,4 +122,27 @@ const obtenerPorId = async (id) => {
   return { ...cita, detalle: servicios };
 };
 
-module.exports = { crear, listar, obtenerPorId };
+// Citas que ocupan al empleado ese día (las canceladas no cuentan)
+const ocupadasDelDia = async (empleadoId, fecha) => {
+  const [filas] = await pool.query(
+    `SELECT cita_hora_inicio, cita_hora_fin
+     FROM cita
+     WHERE id_empleado = ?
+       AND cita_estado IN ('PENDIENTE', 'CONFIRMADA')
+       AND cita_hora_inicio >= ? AND cita_hora_inicio < DATE_ADD(?, INTERVAL 1 DAY)`,
+    [empleadoId, fecha, fecha]
+  );
+  return filas;
+};
+
+// Solo cambia si la cita sigue en el estado "desde": evita que dos acciones simultáneas se pisen
+const cambiarEstado = async (id, { desde, hacia, motivo = null }) => {
+  const [resultado] = await pool.query(
+    `UPDATE cita SET cita_estado = ?, cita_motivo_cancelacion = ?
+     WHERE cita_id = ? AND cita_estado = ?`,
+    [hacia, motivo, id, desde]
+  );
+  return resultado.affectedRows > 0;
+};
+
+module.exports = { crear, listar, obtenerPorId, ocupadasDelDia, cambiarEstado };

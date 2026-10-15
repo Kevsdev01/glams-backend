@@ -9,11 +9,62 @@ const {
   formatearFechaHora,
   diaSemanaISO,
   sumarMinutos,
+  horaAMinutos,
+  minutosAHora,
 } = require('../utils/fechas');
 
 const ESTADOS = ['PENDIENTE', 'CONFIRMADA', 'COMPLETADA', 'CANCELADA', 'NO_ASISTIO'];
+const PASO_MINUTOS = 30; // de cuánto en cuánto se ofrecen las horas (9:00, 9:30, 10:00...)
+const HORAS_MIN_CANCELAR = process.env.CANCELACION_HORAS_MIN
+  ? Number(process.env.CANCELACION_HORAS_MIN)
+  : 2;
+
+const TRANSICIONES = {
+  PENDIENTE: ['CONFIRMADA', 'CANCELADA'],
+  CONFIRMADA: ['COMPLETADA', 'NO_ASISTIO', 'CANCELADA'],
+  COMPLETADA: [],
+  CANCELADA: [],
+  NO_ASISTIO: [],
+};
+
+// Qué roles pueden llevar una cita a cada estado
+const PERMITIDO = {
+  CONFIRMADA: ['ADMIN'],
+  CANCELADA: ['ADMIN', 'CLIENTE'],
+  COMPLETADA: ['ADMIN', 'EMPLEADO'],
+  NO_ASISTIO: ['ADMIN', 'EMPLEADO'],
+};
 
 const bad = (res, mensaje, codigo = 400) => res.status(codigo).json({ ok: false, mensaje });
+
+// Valida la lista de ids y calcula duración y total; la usan crear cita y horas libres
+const cargarServicios = async (ids) => {
+  if (
+    !Array.isArray(ids) ||
+    ids.length < 1 ||
+    ids.length > 5 ||
+    ids.some((id) => !Number.isInteger(id) || id < 1) ||
+    new Set(ids).size !== ids.length
+  ) {
+    return { error: 'servicios debe ser una lista de 1 a 5 ids de servicios distintos' };
+  }
+
+  const detalle = [];
+  let duracionTotal = 0;
+  let total = 0;
+  for (const id of ids) {
+    const servicio = await Servicio.obtenerPorId(id);
+    if (!servicio || servicio.port_cita_estado !== 'ACTIVO') {
+      return { error: `El servicio ${id} no existe o no está activo` };
+    }
+    detalle.push({ id: servicio.port_cita_id, precio: servicio.port_cita_precio });
+    duracionTotal += servicio.port_cita_duracion_minutos;
+    total += Number(servicio.port_cita_precio);
+  }
+
+  return { detalle, duracionTotal, total };
+};
+
 
 const crearCita = async (req, res) => {
   try {
@@ -52,28 +103,10 @@ const crearCita = async (req, res) => {
       return bad(res, 'La cita debe ser en una fecha y hora futuras');
     }
 
-    // 4. Servicios
-    if (
-      !Array.isArray(servicios) ||
-      servicios.length < 1 ||
-      servicios.length > 5 ||
-      servicios.some((id) => !Number.isInteger(id) || id < 1) ||
-      new Set(servicios).size !== servicios.length
-    ) {
-      return bad(res, 'servicios debe ser una lista de 1 a 5 ids de servicios distintos');
-    }
-
-    const detalle = [];
-    let duracionTotal = 0;
-    let total = 0;
-    for (const id of servicios) {
-      const servicio = await Servicio.obtenerPorId(id);
-      if (!servicio || servicio.port_cita_estado !== 'ACTIVO') {
-        return bad(res, `El servicio ${id} no existe o no está activo`);
-      }
-      detalle.push({ id: servicio.port_cita_id, precio: servicio.port_cita_precio });
-      duracionTotal += servicio.port_cita_duracion_minutos;
-      total += Number(servicio.port_cita_precio);
+        // 4. Servicios
+    const { error: errorServicios, detalle, duracionTotal, total } = await cargarServicios(servicios);
+    if (errorServicios) {
+      return bad(res, errorServicios);
     }
 
     // 5. Hora de fin
@@ -172,4 +205,132 @@ const obtenerCita = async (req, res) => {
   }
 };
 
-module.exports = { crearCita, listarCitas, obtenerCita };
+const cambiarEstadoCita = async (req, res) => {
+  try {
+    const { estado, motivo } = req.body || {};
+
+    if (!PERMITIDO[estado]) {
+      return bad(res, 'estado debe ser CONFIRMADA, CANCELADA, COMPLETADA o NO_ASISTIO');
+    }
+
+    const cita = await Cita.obtenerPorId(req.params.id);
+    const { rol, id } = req.usuario;
+    const esDueno = rol === 'CLIENTE' && cita && cita.cliente_id === id;
+    const esAsignado = rol === 'EMPLEADO' && cita && cita.id_empleado === id;
+
+    // Si no es suya respondemos 404, para no revelar que existe
+    if (!cita || !(rol === 'ADMIN' || esDueno || esAsignado)) {
+      return bad(res, 'Cita no encontrada', 404);
+    }
+
+    if (!PERMITIDO[estado].includes(rol)) {
+      return bad(res, 'No tienes permiso para realizar esta acción', 403);
+    }
+
+    if (!TRANSICIONES[cita.cita_estado].includes(estado)) {
+      return bad(res, `No se puede pasar una cita de ${cita.cita_estado} a ${estado}`, 409);
+    }
+
+    const inicio = parsearFechaHora(cita.cita_hora_inicio.slice(0, 16));
+    const ahora = new Date();
+
+    let motivoLimpio = null;
+    if (estado === 'CANCELADA') {
+      if (typeof motivo !== 'string' || motivo.trim().length < 3 || motivo.trim().length > 255) {
+        return bad(res, 'motivo es obligatorio (entre 3 y 255 caracteres)');
+      }
+      motivoLimpio = motivo.trim();
+
+      // El cliente debe cancelar con anticipación; el administrador no tiene esa restricción
+      if (rol === 'CLIENTE' && inicio.getTime() - ahora.getTime() < HORAS_MIN_CANCELAR * 3600000) {
+        return bad(
+          res,
+          `Solo puedes cancelar con al menos ${HORAS_MIN_CANCELAR} hora(s) de anticipación`,
+          409
+        );
+      }
+    }
+
+    if ((estado === 'COMPLETADA' || estado === 'NO_ASISTIO') && inicio > ahora) {
+      return bad(res, 'Aún no ha llegado la hora de la cita', 409);
+    }
+
+    const cambiado = await Cita.cambiarEstado(cita.cita_id, {
+      desde: cita.cita_estado,
+      hacia: estado,
+      motivo: motivoLimpio,
+    });
+    if (!cambiado) {
+      return bad(res, 'La cita cambió de estado mientras se procesaba. Intenta de nuevo', 409);
+    }
+
+    res.json({ ok: true, mensaje: `Cita ${estado.toLowerCase()}` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, mensaje: 'Error al cambiar el estado de la cita' });
+  }
+};
+
+const horasLibres = async (req, res) => {
+  try {
+    const { empleadoId, fecha } = req.query;
+
+    if (!/^\d+$/.test(empleadoId || '')) {
+      return bad(res, 'empleadoId es obligatorio y debe ser un número');
+    }
+    const dia = parsearFechaHora(`${fecha} 00:00`);
+    if (!dia) {
+      return bad(res, 'fecha es obligatoria y debe tener el formato AAAA-MM-DD');
+    }
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    if (dia < hoy) {
+      return bad(res, 'La fecha no puede ser pasada');
+    }
+
+    // servicios llega como "1,2,3"
+    const ids = String(req.query.servicios || '').split(',').filter(Boolean).map(Number);
+    const { error: errorServicios, duracionTotal } = await cargarServicios(ids);
+    if (errorServicios) {
+      return bad(res, errorServicios);
+    }
+
+    const empleado = await Usuario.buscarPorId(empleadoId);
+    if (!empleado || empleado.role_nombre !== 'EMPLEADO' || empleado.user_estado !== 'ACTIVO') {
+      return bad(res, 'Empleado no encontrado', 404);
+    }
+
+    const bloques = await Disponibilidad.listarBloquesDisponibles(empleadoId, diaSemanaISO(dia));
+    const ocupadas = (await Cita.ocupadasDelDia(empleadoId, fecha)).map((c) => ({
+      inicio: horaAMinutos(c.cita_hora_inicio.slice(11)),
+      fin: horaAMinutos(c.cita_hora_fin.slice(11)),
+    }));
+
+    const ahora = new Date();
+    const esHoy = fecha === formatearFecha(ahora);
+    const minutosAhora = ahora.getHours() * 60 + ahora.getMinutes();
+
+    const horas = [];
+    for (const bloque of bloques) {
+      const desde = horaAMinutos(bloque.disp_empl_hora_inicio);
+      const hasta = horaAMinutos(bloque.disp_empl_hora_fin);
+
+      for (let inicio = desde; inicio + duracionTotal <= hasta; inicio += PASO_MINUTOS) {
+        const fin = inicio + duracionTotal;
+        if (esHoy && inicio <= minutosAhora) continue; // ya pasó
+        const choca = ocupadas.some((o) => o.inicio < fin && o.fin > inicio);
+        if (!choca) horas.push(minutosAHora(inicio));
+      }
+    }
+
+    res.json({
+      ok: true,
+      data: { fecha, empleado_id: Number(empleadoId), duracion_minutos: duracionTotal, horas },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, mensaje: 'Error al consultar las horas libres' });
+  }
+};
+
+module.exports = { crearCita, listarCitas, obtenerCita, cambiarEstadoCita, horasLibres };
