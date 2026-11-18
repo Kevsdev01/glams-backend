@@ -1,0 +1,22 @@
+:root {
+  /* Marca */
+  --rosa: #b85b73;
+  --rosa-oscuro: #9f435d;   /* botones: contraste legible con texto blanco */
+  --rosa-suave: #f9e9ed;
+  --crema: #fffaf9;
+  --dorado: #b99052;        /* solo decoración */
+  --dorado-texto: #8a6a35;  /* dorado para texto: contraste suficiente */
+  --tinta: #34282d;
+  --apagado: #806f75;
+  --linea: #eadde0;
+  --error: #b00020;
+  --exito: #1b7a3d;
+
+  /* Tipografía */
+  --fuente-titulos: 'Cormorant Garamond', Georgia, serif;
+  --fuente-texto: 'Manrope', system-ui, sans-serif;
+
+  /* Forma */
+  --radio: 12px;
+  --sombra: 0 10px 30px rgb(74 38 49 / 0.1);
+}

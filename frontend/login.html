@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión | Glams Nails Spa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <main class="auth">
+    <section class="auth-visual" aria-hidden="true">
+      <div class="auth-cita">
+        <blockquote>La belleza comienza en el momento en que decides dedicarte tiempo.</blockquote>
+        <small>TU MOMENTO, TU RITUAL</small>
+      </div>
+    </section>
+
+    <section class="auth-panel">
+      <div class="auth-caja">
+        <img class="auth-logo" src="/img/logo.png" alt="Glams Nails Spa">
+        <p class="eyebrow">Tu espacio personal</p>
+        <h1>Qué alegría verte</h1>
+        <p class="auth-intro">Ingresa para gestionar tus citas y momentos de bienestar.</p>
+
+        <form id="form-login" novalidate>
+          <div class="campo">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" autocomplete="username" placeholder="nombre@correo.com" required>
+          </div>
+          <div class="campo">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" autocomplete="current-password" required>
+          </div>
+
+          <p id="mensaje" class="mensaje" role="alert"></p>
+          <button class="btn" type="submit" id="btn-enviar">Iniciar sesión</button>
+        </form>
+
+        <p class="auth-pie">¿Aún no tienes cuenta? <a href="/registro.html">Crear cuenta</a></p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/js/paginas/login.js"></script>
+</body>
+</html>

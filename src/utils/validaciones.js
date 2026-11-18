@@ -14,8 +14,13 @@ const validarDatosUsuario = (body) => {
   if (!CORREO_REGEX.test(correoLimpio) || correoLimpio.length > 100) {
     return { error: 'El correo no es válido' };
   }
-  if (password.length < 8 || password.length > 72) {
-    return { error: 'La contraseña debe tener entre 8 y 72 caracteres' };
+    if (
+    password.length < 8 ||
+    password.length > 72 ||
+    !/[A-Z]/.test(password) ||
+    !/[0-9]/.test(password)
+  ) {
+    return { error: 'La contraseña debe tener de 8 a 72 caracteres, una mayúscula y un número' };
   }
   if (nombre.trim().length > 50 || apellido.trim().length > 50) {
     return { error: 'nombre y apellido admiten máx. 50 caracteres' };

@@ -1,0 +1,27 @@
+.auth { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
+
+.auth-visual {
+  display: flex;
+  align-items: flex-end;
+  padding: 3rem;
+  color: #fff;
+  background: linear-gradient(160deg, var(--rosa) 0%, var(--rosa-oscuro) 100%);
+}
+.auth-cita { max-width: 28rem; }
+.auth-cita blockquote { margin: 0 0 1rem; font-family: var(--fuente-titulos); font-size: 2rem; line-height: 1.25; }
+.auth-cita small { font-size: 0.72rem; letter-spacing: 0.2em; opacity: 0.9; }
+
+.auth-panel { display: grid; place-items: center; padding: 2rem 1.25rem; background: #fff; }
+.auth-caja { width: 100%; max-width: 26rem; }
+.auth-logo { width: 200px; margin: 0 auto 2rem; }
+.auth-caja h1 { margin-bottom: 0.5rem; font-size: 2.1rem; }
+.auth-intro { margin: 0 0 1.5rem; font-size: 0.92rem; color: var(--apagado); }
+.auth-pie { margin-top: 1.25rem; text-align: center; font-size: 0.9rem; color: var(--apagado); }
+
+.terminos { display: flex; gap: 0.6rem; align-items: flex-start; margin-bottom: 1rem; font-size: 0.85rem; }
+.terminos input { width: auto; margin-top: 0.2rem; accent-color: var(--rosa-oscuro); }
+
+@media (max-width: 860px) {
+  .auth { grid-template-columns: 1fr; }
+  .auth-visual { display: none; }
+}
