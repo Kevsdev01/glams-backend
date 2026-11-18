@@ -27,6 +27,7 @@ app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/usuarios', require('./routes/usuario.routes'));
 app.use('/api/disponibilidad', require('./routes/disponibilidad.routes'));
 app.use('/api/citas', require('./routes/cita.routes'));
-
+app.use('/api/pagos', require('./routes/pago.routes'));
+app.use('/api/facturas', require('./routes/factura.routes'));
 
 module.exports = app;
