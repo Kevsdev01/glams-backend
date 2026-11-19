@@ -1,0 +1,98 @@
+.app { display: grid; grid-template-columns: 17rem 1fr; min-height: 100vh; }
+
+/* Barra lateral */
+.lateral {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 1.5rem 1rem;
+  background: #fff;
+  border-right: 1px solid var(--linea);
+}
+.lateral-logo { width: 150px; margin: 0 auto 2rem; }
+
+.nav { display: grid; gap: 0.25rem; }
+.nav-enlace {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  color: var(--tinta);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.nav-enlace:hover { background: var(--rosa-suave); }
+.nav-enlace[aria-current='page'] { background: var(--rosa-suave); color: var(--rosa-oscuro); }
+.nav-enlace.desactivado { color: var(--apagado); cursor: not-allowed; }
+.nav-enlace.desactivado:hover { background: transparent; }
+
+.etiqueta-pronto {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--linea);
+  color: var(--apagado);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lateral-usuario { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--linea); }
+.lateral-usuario p { margin: 0; }
+.lateral-nombre { font-weight: 700; }
+.lateral-rol { margin-bottom: 0.9rem !important; font-size: 0.82rem; color: var(--apagado); }
+
+/* Zona principal */
+.principal { min-width: 0; }
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: none;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1.25rem;
+  border-bottom: 1px solid var(--linea);
+  background: rgb(255 250 249 / 0.92);
+  backdrop-filter: blur(6px);
+}
+.barra-marca { margin: 0; font-family: var(--fuente-titulos); font-size: 1.3rem; font-weight: 600; color: var(--rosa-oscuro); }
+.btn-menu {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--tinta);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.contenido { max-width: 70rem; margin: 0 auto; padding: 2.5rem 1.5rem 3rem; outline: none; }
+.velo { display: none; }
+
+/* Pantallas pequeñas: la barra lateral pasa a ser un cajón */
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .barra { display: flex; }
+
+  .lateral {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 20;
+    width: 17rem;
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition: transform 0.25s, visibility 0.25s;
+  }
+  .lateral.abierta { visibility: visible; transform: none; }
+
+  .velo.visible { display: block; position: fixed; inset: 0; z-index: 10; background: rgb(52 40 45 / 0.45); }
+  .contenido { padding: 1.5rem 1rem 2.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lateral { transition: none; }
+}

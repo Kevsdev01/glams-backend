@@ -9,17 +9,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/componentes.css">
 </head>
 <body>
-  <main class="centrado">
-    <section class="tarjeta">
-      <p class="eyebrow">Mi espacio de bienestar</p>
-      <h1>Hola, <span id="nombre">…</span></h1>
-      <p>Rol: <span id="rol">…</span></p>
-      <p id="mensaje" class="mensaje" role="alert"></p>
-      <button class="btn btn-secundario" id="btn-salir" type="button">Cerrar sesión</button>
-    </section>
-  </main>
+  <div class="app">
+    <aside class="lateral" id="lateral" aria-label="Navegación principal">
+      <img class="lateral-logo" src="/img/logo.png" alt="Glams Nails Spa">
+      <nav class="nav" id="nav" aria-label="Secciones"></nav>
+
+      <div class="lateral-usuario">
+        <p class="lateral-nombre" id="usuario-nombre"></p>
+        <p class="lateral-rol" id="usuario-rol"></p>
+        <button class="btn btn-secundario" type="button" id="btn-salir">Cerrar sesión</button>
+      </div>
+    </aside>
+    <div class="velo" id="velo"></div>
+
+    <div class="principal">
+      <header class="barra">
+        <button class="btn-menu" type="button" id="btn-menu" aria-label="Abrir menú"
+                aria-expanded="false" aria-controls="lateral">☰</button>
+        <p class="barra-marca">Glams Nails Spa</p>
+      </header>
+      <main class="contenido" id="contenido" tabindex="-1"></main>
+    </div>
+  </div>
 
   <script type="module" src="/js/paginas/app.js"></script>
 </body>

@@ -1,0 +1,37 @@
+.titulo-pagina { margin-bottom: 0.5rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+.subtitulo { margin: 0 0 2rem; color: var(--apagado); }
+.cargando, .vacio { color: var(--apagado); }
+.cargando { padding: 2rem 0; }
+
+.rejilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1.25rem; }
+
+.panel {
+  padding: 1.5rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  background: #fff;
+  box-shadow: var(--sombra);
+}
+.panel h2 { margin-bottom: 1rem; font-size: 1.4rem; }
+
+.cifra { margin: 0; font-family: var(--fuente-titulos); font-size: 3rem; line-height: 1; color: var(--rosa-oscuro); }
+
+.lista-citas { display: grid; gap: 0.9rem; margin: 0; padding: 0; list-style: none; }
+.cita-item { padding-bottom: 0.9rem; border-bottom: 1px solid var(--linea); }
+.cita-item:last-child { padding-bottom: 0; border-bottom: 0; }
+.cita-item p { margin: 0; }
+.cita-fecha { font-weight: 700; }
+.cita-detalle { margin: 0; font-size: 0.9rem; color: var(--apagado); }
+
+.insignia {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--rosa-suave);
+  color: var(--rosa-oscuro);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.insignia-confirmada { background: #e3f4e8; color: var(--exito);
+ }

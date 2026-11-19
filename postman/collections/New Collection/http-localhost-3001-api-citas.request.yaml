@@ -1,0 +1,19 @@
+$kind: http-request
+name: http://localhost:3001/api/citas
+description: ""
+url: http://localhost:3001/api/citas
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"clienteId\": \"56\",\r
+
+    \  \"fecha\": \"2026-11-23\",\r
+
+    \  \"hora\": \"15:30\",\r
+
+    \  \"serviciId\": \"1\"\r
+
+    }"
+order: 2000

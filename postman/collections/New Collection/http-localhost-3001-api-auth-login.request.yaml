@@ -1,0 +1,15 @@
+$kind: http-request
+name: http://localhost:3001/api/auth/login
+description: ""
+url: http://localhost:3001/api/auth/login
+method: POST
+body:
+  type: json
+  content: "   {\r
+
+    \     \"correo\": \"ksamuel.ortix@gmail.com\",\r
+
+    \     \"password\": \"1091975138\"\r
+
+    \   }"
+order: 1000
